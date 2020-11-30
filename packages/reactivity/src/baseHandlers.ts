@@ -68,27 +68,31 @@ const arrayInstrumentations: Record<string, Function> = {}
     return res
   }
 })
-
+// 是否只读 // 是否事一层
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target: Target, key: string | symbol, receiver: object) {
+    // 判断是否是激活状态
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
-      return isReadonly
+      return isReadonly // 判断是否是只读属性
     } else if (
+      // 找原始 对象
       key === ReactiveFlags.RAW &&
       receiver === (isReadonly ? readonlyMap : reactiveMap).get(target)
     ) {
       return target
     }
-
+    // 如果是数组 ，Array
     const targetIsArray = isArray(target)
     if (targetIsArray && hasOwn(arrayInstrumentations, key)) {
       return Reflect.get(arrayInstrumentations, key, receiver)
     }
-
+    // -------------
+    // 取值
     const res = Reflect.get(target, key, receiver)
 
+    // 看不懂
     if (
       isSymbol(key)
         ? builtInSymbols.has(key as symbol)
@@ -97,14 +101,15 @@ function createGetter(isReadonly = false, shallow = false) {
       return res
     }
 
+    // 非只读 跟踪
     if (!isReadonly) {
       track(target, TrackOpTypes.GET, key)
     }
-
+    // 一层就直接返回
     if (shallow) {
       return res
     }
-
+    // 是否是ref对象
     if (isRef(res)) {
       // ref unwrapping - does not apply for Array + integer key.
       const shouldUnwrap = !targetIsArray || !isIntegerKey(key)

@@ -37,6 +37,7 @@ export const NOOP = () => {}
  */
 export const NO = () => false
 
+// 判断是不是on事件
 const onRE = /^on[^a-z]/
 export const isOn = (key: string) => onRE.test(key)
 

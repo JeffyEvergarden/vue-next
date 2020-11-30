@@ -16,18 +16,18 @@ export const enum ReactiveFlags {
   SKIP = '__v_skip',
   IS_REACTIVE = '__v_isReactive',
   IS_READONLY = '__v_isReadonly',
-  RAW = '__v_raw'
+  RAW = '__v_raw' // 表示是否做过响应式处理
 }
 
 export interface Target {
-  [ReactiveFlags.SKIP]?: boolean
+  [ReactiveFlags.SKIP]?: boolean //是否可跳过不监听
   [ReactiveFlags.IS_REACTIVE]?: boolean
   [ReactiveFlags.IS_READONLY]?: boolean
   [ReactiveFlags.RAW]?: any
 }
 
-export const reactiveMap = new WeakMap<Target, any>()
-export const readonlyMap = new WeakMap<Target, any>()
+export const reactiveMap = new WeakMap<Target, any>() // 响应式
+export const readonlyMap = new WeakMap<Target, any>() // 只读
 
 const enum TargetType {
   INVALID = 0,
@@ -49,7 +49,7 @@ function targetTypeMap(rawType: string) {
       return TargetType.INVALID
   }
 }
-
+// 如果不用监听，或者不可扩展 返回0 否则返回 1/2
 function getTargetType(value: Target) {
   return value[ReactiveFlags.SKIP] || !Object.isExtensible(value)
     ? TargetType.INVALID
@@ -135,6 +135,7 @@ export type DeepReadonly<T> = T extends Builtin
  * Creates a readonly copy of the original object. Note the returned copy is not
  * made reactive, but `readonly` can be called on an already reactive object.
  */
+// 创建只读
 export function readonly<T extends object>(
   target: T
 ): DeepReadonly<UnwrapNestedRefs<T>> {
@@ -145,7 +146,7 @@ export function readonly<T extends object>(
     readonlyCollectionHandlers
   )
 }
-
+// 只监听一层
 /**
  * Returns a reactive-copy of the original object, where only the root level
  * properties are readonly, and does NOT unwrap refs nor recursively convert
@@ -169,6 +170,7 @@ function createReactiveObject(
   baseHandlers: ProxyHandler<any>,
   collectionHandlers: ProxyHandler<any>
 ) {
+  // 非对象返回传入值本身
   if (!isObject(target)) {
     if (__DEV__) {
       console.warn(`value cannot be made reactive: ${String(target)}`)
@@ -177,6 +179,9 @@ function createReactiveObject(
   }
   // target is already a Proxy, return it.
   // exception: calling readonly() on a reactive object
+  // 如果已经做过响应式处理，并且 只读为false 返回本身
+  // 如果已经做过响应式处理，并且 已设置成非只读
+  // target[ReactiveFlags.RAW] && (!isReadonly || !target[ReactiveFlags.IS_REACTIVE]))
   if (
     target[ReactiveFlags.RAW] &&
     !(isReadonly && target[ReactiveFlags.IS_REACTIVE])
@@ -184,20 +189,24 @@ function createReactiveObject(
     return target
   }
   // target already has corresponding Proxy
+  // 对象早已存在
   const proxyMap = isReadonly ? readonlyMap : reactiveMap
   const existingProxy = proxyMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
   // only a whitelist of value types can be observed.
+  // 只有符合的对象才能被监听 Object/Array/map/set/weakmap/weakset
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
   }
+  //代理对象
   const proxy = new Proxy(
     target,
     targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers
   )
+  // 设置map的值
   proxyMap.set(target, proxy)
   return proxy
 }
@@ -209,20 +218,22 @@ export function isReactive(value: unknown): boolean {
   return !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
 }
 
+// 如果设置了只读属性 根据对象的__v_isReadonly值判断
 export function isReadonly(value: unknown): boolean {
   return !!(value && (value as Target)[ReactiveFlags.IS_READONLY])
 }
 
+// 如果设置了代理
 export function isProxy(value: unknown): boolean {
   return isReactive(value) || isReadonly(value)
 }
-
+//必须传对象，会递归找到最底层的原始对象 因为可能会代理再代理
 export function toRaw<T>(observed: T): T {
   return (
     (observed && toRaw((observed as Target)[ReactiveFlags.RAW])) || observed
   )
 }
-
+// 为对象定义一个ReactiveFlags.SKIP值 配置成不可枚举
 export function markRaw<T extends object>(value: T): T {
   def(value, ReactiveFlags.SKIP, true)
   return value
