@@ -42,6 +42,7 @@ const arrayInstrumentations: Record<string, Function> = {}
 // values
 ;(['includes', 'indexOf', 'lastIndexOf'] as const).forEach(key => {
   const method = Array.prototype[key] as any
+  // 实际上this在这里的写法只有ts可以用，node和浏览器环境都不允许使用this做变量
   arrayInstrumentations[key] = function(this: unknown[], ...args: unknown[]) {
     const arr = toRaw(this)
     for (let i = 0, l = this.length; i < l; i++) {
@@ -85,7 +86,8 @@ function createGetter(isReadonly = false, shallow = false) {
     }
     // 如果是数组 ，Array
     const targetIsArray = isArray(target)
-
+    // ['includes', 'indexOf', 'lastIndexOf']
+    // list.indexOf('fake')
     if (!isReadonly && targetIsArray && hasOwn(arrayInstrumentations, key)) {
       return Reflect.get(arrayInstrumentations, key, receiver)
     }
@@ -155,10 +157,13 @@ function createSetter(shallow = false) {
         : hasOwn(target, key)
     const result = Reflect.set(target, key, value, receiver)
     // don't trigger if target is something up in the prototype chain of original
+    //
     if (target === toRaw(receiver)) {
       if (!hadKey) {
+        // 加值
         trigger(target, TriggerOpTypes.ADD, key, value)
       } else if (hasChanged(value, oldValue)) {
+        //
         trigger(target, TriggerOpTypes.SET, key, value, oldValue)
       }
     }
