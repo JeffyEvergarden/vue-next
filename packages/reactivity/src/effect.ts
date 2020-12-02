@@ -151,8 +151,8 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
     depsMap.set(key, (dep = new Set()))
   }
   if (!dep.has(activeEffect)) {
-    dep.add(activeEffect)
-    activeEffect.deps.push(dep)
+    dep.add(activeEffect) // 根据对象、key值 保存 activeEffect 到一个set集合
+    activeEffect.deps.push(dep) // 当前激活Effect 的deps 存储这个set集合
     if (__DEV__ && activeEffect.options.onTrack) {
       activeEffect.options.onTrack({
         effect: activeEffect,
@@ -172,13 +172,15 @@ export function trigger(
   oldValue?: unknown,
   oldTarget?: Map<unknown, unknown> | Set<unknown>
 ) {
+  // 找不到映射对象返回
   const depsMap = targetMap.get(target)
   if (!depsMap) {
     // never been tracked
     return
   }
-
+  // 创建一个effects集合
   const effects = new Set<ReactiveEffect>()
+  // 将一个集合的值都加到上述集合里
   const add = (effectsToAdd: Set<ReactiveEffect> | undefined) => {
     if (effectsToAdd) {
       effectsToAdd.forEach(effect => {
@@ -201,6 +203,7 @@ export function trigger(
     })
   } else {
     // schedule runs for SET | ADD | DELETE
+    // 这部执行set
     if (key !== void 0) {
       add(depsMap.get(key))
     }
