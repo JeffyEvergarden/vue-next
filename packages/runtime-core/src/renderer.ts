@@ -2226,7 +2226,7 @@ function baseCreateRenderer(
   }
 
   return {
-    render,
+    render, // vnode => dom
     hydrate,
     createApp: createAppAPI(render, hydrate)
   }

@@ -8,7 +8,7 @@ if (!process.env.TARGET) {
 }
 
 const masterVersion = require('./package.json').version
-const packagesDir = path.resolve(__dirname, 'packages')
+const packagesDir = path.resolve(__dirname, 'packages') // 包的路径
 const packageDir = path.resolve(packagesDir, process.env.TARGET)
 const name = path.basename(packageDir)
 const resolve = p => path.resolve(packageDir, p)
