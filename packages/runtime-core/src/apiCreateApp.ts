@@ -242,8 +242,9 @@ export function createAppAPI<HostElement>(
           }
 
           if (isHydrate && hydrate) {
-            hydrate(vnode as VNode<Node, Element>, rootContainer as any)
+            hydrate(vnode as VNode<Node, Element>, rootContainer as any) // 服务端渲染
           } else {
+            // 浏览器端渲染
             render(vnode, rootContainer)
           }
           isMounted = true

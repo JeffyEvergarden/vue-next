@@ -562,12 +562,12 @@ function setupStatefulComponent(
   instance.accessCache = Object.create(null)
   // 1. create public instance / render proxy
   // also mark it raw so it's never observed
-  instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers)
+  instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers) // 数据响应式
   if (__DEV__) {
     exposePropsOnRenderContext(instance)
   }
   // 2. call setup()
-  const { setup } = Component
+  const { setup } = Component // 处理setup
   if (setup) {
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
