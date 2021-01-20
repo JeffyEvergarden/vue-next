@@ -1,8 +1,8 @@
-import { compile as baseCompile } from '@vue/compiler-dom'
+import { compile } from '@vue/compiler-dom'
 
-const template = '<div>{{fake}}</div>'
-const { ast, code } = baseCompile(template)
-console.log('ast')
+const template = '<p>{{state.kkb}}</p>'
+const { ast, code } = compile(template)
+console.log('ast:----')
 console.log(ast)
-console.log('ast')
+console.log('code:----')
 console.log(code)
