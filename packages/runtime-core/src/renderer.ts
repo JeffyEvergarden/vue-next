@@ -420,7 +420,7 @@ function baseCreateRenderer(
   createHydrationFns: typeof createHydrationFunctions
 ): HydrationRenderer
 
-// implementation
+// implementation // 尼玛吓死人 的 千行代码
 function baseCreateRenderer(
   options: RendererOptions,
   createHydrationFns?: typeof createHydrationFunctions
@@ -450,8 +450,8 @@ function baseCreateRenderer(
   // Note: functions inside this closure should use `const xxx = () => {}`
   // style in order to prevent being inlined by minifiers.
   const patch: PatchFn = (
-    n1,
-    n2,
+    n1, // 老虚拟节点
+    n2, // 新虚拟节点
     container,
     anchor = null,
     parentComponent = null,
@@ -470,23 +470,23 @@ function baseCreateRenderer(
       optimized = false
       n2.dynamicChildren = null
     }
-
+    // 获取新节点类型
     const { type, ref, shapeFlag } = n2
     switch (type) {
-      case Text:
+      case Text: // 文本
         processText(n1, n2, container, anchor)
         break
-      case Comment:
+      case Comment: // 注释
         processCommentNode(n1, n2, container, anchor)
         break
-      case Static:
+      case Static: // 静态
         if (n1 == null) {
           mountStaticNode(n2, container, anchor, isSVG)
         } else if (__DEV__) {
           patchStaticNode(n1, n2, container, isSVG)
         }
         break
-      case Fragment:
+      case Fragment: // 非单根节点
         processFragment(
           n1,
           n2,
@@ -511,6 +511,7 @@ function baseCreateRenderer(
             optimized
           )
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
+          // 初始化走这里
           processComponent(
             n1,
             n2,
@@ -1213,6 +1214,7 @@ function baseCreateRenderer(
           optimized
         )
       } else {
+        // 初始化
         mountComponent(
           n2,
           container,
@@ -1237,6 +1239,7 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
+    // 创建组件实例
     const instance: ComponentInternalInstance = (initialVNode.component = createComponentInstance(
       initialVNode,
       parentComponent,
@@ -1261,7 +1264,8 @@ function baseCreateRenderer(
     if (__DEV__) {
       startMeasure(instance, `init`)
     }
-    setupComponent(instance)
+    // 2组件安装 类似于 vue2_init
+    setupComponent(instance) // 数据响应式
     if (__DEV__) {
       endMeasure(instance, `init`)
     }
@@ -1279,7 +1283,7 @@ function baseCreateRenderer(
       }
       return
     }
-
+    // 3、 安装渲染函数的副作用
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1360,6 +1364,7 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `render`)
         }
+        // 首先获取根组件的vnode
         const subTree = (instance.subTree = renderComponentRoot(instance))
         if (__DEV__) {
           endMeasure(instance, `render`)
@@ -2197,6 +2202,8 @@ function baseCreateRenderer(
         unmount(container._vnode, null, null, true)
       }
     } else {
+      // 参数1 存在走更新
+      // 参数1 不存在走挂载
       patch(container._vnode || null, vnode, container)
     }
     flushPostFlushCbs()
@@ -2224,10 +2231,10 @@ function baseCreateRenderer(
       Element
     >)
   }
-
+  // 返回这三个方法
   return {
-    render, // vnode => dom
-    hydrate,
+    render, // 渲染方法 render(vnode，container) 转换操作
+    hydrate, // 注水 用于服务端渲染
     createApp: createAppAPI(render, hydrate)
   }
 }

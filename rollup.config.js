@@ -113,7 +113,7 @@ function createConfig(format, output, plugins = []) {
   // it also seems to run into weird issues when checking multiple times
   // during a single build.
   hasTSChecked = true
-
+  // 打包 入口文件
   const entryFile = /runtime$/.test(format) ? `src/runtime.ts` : `src/index.ts`
 
   const external =
