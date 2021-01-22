@@ -6,14 +6,50 @@
   <title>Document</title>
 </head>
 <body>
-  <div id="app">{{foo}}</div>
+  <div id="app">
+    <p>{{msg}}</p>
+    <div>静态组件</div>
+    <static-comp></static-comp>
+    <div>有变量的组件</div>
+    <dy-comp></dy-comp>
+    <div>有变量和插槽的组件</div>
+    <dy-slot-comp></dy-slot-comp>
+    <div>有插槽的组件</div>
+    <slot-comp><span>hello</span></slot-comp>
+    <div>函数组件</div>
+    <!-- <func-comp level="1"></func-comp> -->
+  </div>
   <script src="../dist/vue.global.js"></script>
   <script>
-    const {createApp} = Vue
+    const {createApp, render} = Vue
     createApp({
       data() {
         return {
-          foo: 'fooo'
+          msg: 'jeffy',
+          level: 1
+        }
+      }
+    }).component('static-comp', {
+      template: '<div>comp1</div>'
+    }).component('dy-comp', {
+      template: '<div>{{fake}}</div>',
+      data() {
+        return {
+          fake: 10
+        }
+      }
+    }).component('dy-slot-comp', {
+      template: '<div>{{fake}}<slot></slot></div>',
+      data() {
+        return {
+          fake: 10
+        }
+      }
+    }).component('slot-comp', {
+      template: '<div style="color: red;">{{fake}}<slot></slot></div>',
+      data() {
+        return {
+          fake: 10
         }
       }
     }).mount('#app')
