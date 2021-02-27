@@ -2207,7 +2207,7 @@ function baseCreateRenderer(
       patch(container._vnode || null, vnode, container)
     }
     flushPostFlushCbs()
-    container._vnode = vnode
+    container._vnode = vnode // 挂到dom上
   }
 
   const internals: RendererInternals = {

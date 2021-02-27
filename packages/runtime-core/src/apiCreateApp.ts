@@ -223,18 +223,19 @@ export function createAppAPI<HostElement>(
         context.directives[name] = directive
         return app
       },
-
+      // 挂载
       mount(rootContainer: HostElement, isHydrate?: boolean): any {
         if (!isMounted) {
+          // 初始化虚拟dom树
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps
-          )
+          ) // 得到vnode
           // store app context on the root VNode.
           // this will be set on the root instance on initial mount.
           vnode.appContext = context
 
-          // HMR root reload
+          // HMR root reload 热更新
           if (__DEV__) {
             context.reload = () => {
               render(cloneVNode(vnode), rootContainer)
@@ -244,7 +245,7 @@ export function createAppAPI<HostElement>(
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any) // 服务端渲染
           } else {
-            // 浏览器端渲染
+            // 浏览器端渲染 ------------------------------
             render(vnode, rootContainer)
           }
           isMounted = true

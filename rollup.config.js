@@ -9,29 +9,33 @@ if (!process.env.TARGET) {
 
 const masterVersion = require('./package.json').version
 const packagesDir = path.resolve(__dirname, 'packages') // 包的路径
-const packageDir = path.resolve(packagesDir, process.env.TARGET)
+const packageDir = path.resolve(packagesDir, process.env.TARGET) // 打什么包 dev默认是vue
 const name = path.basename(packageDir)
 const resolve = p => path.resolve(packageDir, p)
 const pkg = require(resolve(`package.json`))
 const packageOptions = pkg.buildOptions || {}
-
+// 入口文件搜entryFile
 // ensure TS checks only once for each build
 let hasTSChecked = false
 
 const outputConfigs = {
   'esm-bundler': {
+    // webpack使用
     file: resolve(`dist/${name}.esm-bundler.js`),
     format: `es`
   },
   'esm-browser': {
+    // es module 浏览器
     file: resolve(`dist/${name}.esm-browser.js`),
     format: `es`
   },
   cjs: {
+    // nodejs环境
     file: resolve(`dist/${name}.cjs.js`),
     format: `cjs`
   },
   global: {
+    // 浏览器
     file: resolve(`dist/${name}.global.js`),
     format: `iife`
   },
